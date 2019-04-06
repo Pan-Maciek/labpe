@@ -10,7 +10,7 @@ const convert_url = url => new Promise(resolve => http.get(url, res => {
   res.on('end', () => {
     const data_buffer = Buffer.concat(data)
     const [, charser] = `${data_buffer}`.match(/charset=([^"]*)/) || []
-    resolve(`${enc.convert(data_buffer, 'utf8', charser)}`.replace(/src="([^"]*)"/gi, (_, src) => `src="${baseurl}/${src}"`))
+    resolve(charser ? `${enc.convert(data_buffer, 'utf8', charser)}` : data_buffer)
   })
 }))
 
