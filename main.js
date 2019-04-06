@@ -1,19 +1,5 @@
-const http = require('http')
-const enc = require('encoding')
-const app = require('express')()
-
-const baseurl = 'http://home.agh.edu.pl/~maziarz/LabPE'
-
-const convert_url = url => new Promise(resolve => http.get(url, res => {
-  const data = []
-  res.on('data', chunk => data.push(chunk))
-  res.on('end', () => {
-    const data_buffer = Buffer.concat(data)
-    const [, charser] = `${data_buffer}`.match(/charset=([^"]*)/) || []
-    resolve(`${enc.convert(data_buffer, 'utf8', charser)}`.replace(/src="([^"]*)"/gi, (_, src) => `src="${baseurl}/${src}"`))
-  })
-}))
-
-app.get('*', async (req, res) => res.send(await convert_url(`${baseurl}/${req.url}`)))
-
-app.listen(process.env.PORT || 3000)
+require('express')().get('*', ({ url }, res) => require('http').get(`http://home.agh.edu.pl/~maziarz/LabPE/${url}`, (response, data) => response
+  .on('data', chunk => data = data ? Buffer.concat([data, chunk]) : chunk)
+  .on('end', ([, charser] = `${data}`.match(/charset=([^"]*)/) || []) =>
+    res.send(charser ? `${require('encoding').convert(data, 'utf8', charser)}` : data))
+)).listen(process.env.PORT || 3000)
