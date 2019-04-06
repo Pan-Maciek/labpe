@@ -5,14 +5,12 @@ const app = require('express')()
 const baseurl = 'http://home.agh.edu.pl/~maziarz/LabPE'
 
 const convert_url = url => new Promise(resolve => http.get(url, res => {
-  let data = []
+  const data = []
   res.on('data', chunk => data.push(chunk))
   res.on('end', () => {
-    data = Buffer.concat(data)
-    const [, charser] = data.toString().match(/charset=([^"]*)/) || [, 'utf8']
-    data = enc.convert(data, 'utf8', charser).toString()
-      .replace(/src="([^"]*)"/gi, (_, src) => `src="${baseurl}/${src}"`)
-    resolve(data)
+    const data_buffer = Buffer.concat(data)
+    const [, charser] = `${data_buffer}`.match(/charset=([^"]*)/) || []
+    resolve(`${enc.convert(data_buffer, 'utf8', charser)}`.replace(/src="([^"]*)"/gi, (_, src) => `src="${baseurl}/${src}"`))
   })
 }))
 
